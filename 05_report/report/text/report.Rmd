@@ -22,6 +22,8 @@ I used the number of suicide data, Covid-19 confirmed case data from MHLW and un
 
 * <a href="https://www.stat.go.jp/data/roudou/longtime/03roudou.html#hyo_1">Unemployment data</a>
 
+Unemployment rate has been considered to be correlated with suicide rate. During recession period, unemployment rate rises and suicide rate rises accordingly. The reason I selected the number of Covid-19 case is that it correlated with period of state of emergency and during this period, some suicide cases were reported on the media.
+
 ### 2.1 Descriptive Statistics
 The table below is summary of data. The data I use contains the number of suicide for each generations and gender, unemployment rate for men and women, and the number of confirmed case of covid-19 from 2013 to 2022. All of data is log-transformed.   
 $$\text{Descriptive Statistics} $$
