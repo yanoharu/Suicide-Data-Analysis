@@ -4,6 +4,7 @@ title: "An Analysis of the Relationship between Suicide Incidences and Suicide-r
 author: "Haruto Yano"
 date: "2023-05-12"
 output:
+  pdf_document: default
   html_document: default
 ---
 
@@ -280,38 +281,3 @@ Although I could observe correlations between the number of suicide and media co
  $$
  If this is true model of suicide, coefficients of reduced form model don't show actual effect of unemployment rate or confirmed case. Future study should address identification issue as well as selection of appropriate variables. 
  
-### Appendix
-```{r, echo = FALSE, results="asis"}
-all_gender_age <- c("manU19","man20s","man30s","man40s","man50s","man60s","man70s","man80s","womU19","wom20s","wom30s","wom40s","wom50s","wom60s","wom70s","wom80s")
-display_coefficient(all_gender_age)
-
-```
-
-
-```{r, echo = FALSE, results="asis"}
-display_diagnostic_test <- function(file_name){
-
-for (file_name in file_name){
-  gender <- stringr::str_to_lower(substr(file_name, 1, 3))
-  age <- substr(file_name, 4, 6)
-
-table_path = here::here("04_analyze","suicide_study", "table", paste0(gender, "_", age),"diagnostic_test", paste0("diagnostic_test_", gender, "_", age, ".html"))
-
-html_content <- readLines(table_path)
-
-# <!DOCTYPE html>を削除する
-html_content <- gsub("<!DOCTYPE html>", "", html_content, ignore.case = TRUE)
-
-# HTMLファイルを一時ファイルに書き出す
-temp_file <- tempfile(fileext = ".html")
-writeLines(html_content, temp_file)
-
-# 一時ファイルを読み込む
-table_output <- htmltools::tags$iframe(src = temp_file, width = "100%", height = "600px")
-print(table_output)}
-}
-
-display_diagnostic_test(all_gender_age)
-
-```
-
