@@ -6,24 +6,34 @@ main <- function(){
   postamble()
 }
 
-
 preamble <- function(){
+  options(box.path = here::here("01_admin"))
   lets('set', 'preamble')
+  lets('set', 'packages')
+  lets('set', 'initialize')
 }
 
 
 build <- function(){
-  lets('build', 'initial')
+  lets('build','num_suicide_tidy')
+  lets('build','unemployment_tidy')
+  lets('build','confirmed_case_tidy')
+  lets('build','master')
 }
 
 
 analyze <- function(){
-  lets('analyze', 'initial')
+  lets('analyze','num_suicide_tidy_check')
+  lets('analyze','unemployment_tidy_check')
+  lets('analyze','confirmed_case_tidy_check')
+  lets('analyze','unit_root_test')
+  lets('analyze','suicide_study')
 }
 
 
 report <- function(){
-  lets('report', 'initial')
+  lets('report', 'checks')
+  lets('report', 'report')
 }
 
 
@@ -34,6 +44,14 @@ postamble <- function(){
 lets <- function(verb_name, object_name){
   if (verb_name == 'set' && object_name == 'preamble'){
     source(here::here('01_admin', '02_preamble', 'R', 'admin.R'))
+  }
+  
+  else if (verb_name == 'set' && object_name == 'initialize'){
+    source(here::here('01_admin', "initialize", 'admin.R'))
+  }
+  
+  else if (verb_name == 'set' && object_name == 'packages'){
+    source(here::here('01_admin', "packages", 'admin.R'))
   }
   
   else if (verb_name == 'build'){
