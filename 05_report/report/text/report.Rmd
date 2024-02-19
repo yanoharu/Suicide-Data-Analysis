@@ -1,0 +1,346 @@
+---
+title: "An Analysis of the Relationship between Suicide Incidences and Suicide-related
+  Media Coverage"
+author: "Haruto Yano"
+date: "2023-05-12"
+output:
+  html_document: default
+---
+
+## 1 Introduction
+
+ This is a data analysis project in Macro Data Science class when I was a junior. In this project, I explore correlation between fluctuation in suicide and media report on suicide using data in Japan. There's been phenomena that we find increase in suicide after media reports suicide of celebrity. This is called <a href="https://ja.wikipedia.org/wiki/%E3%82%A6%E3%82%A7%E3%83%AB%E3%83%86%E3%83%AB%E5%8A%B9%E6%9E%9C">"Werther effect"</a> or "Copycat suicide". Especially, during covid-19 pandemic, we saw increase in suicide and some of them were reported by media. If we actually can observe the phenomenon, then policy maker and mass media have to take some measure to prevent news report from inducing suicide. My purpose here is to make it clear that whether we can find "Werther effect". If you are not familier with time series data analysis, <a href="https://www.sciencedirect.com/science/article/pii/S2405918817300405">this paper</a> helps you understand time series analysis briefly.
+
+
+## 2 Data
+
+I used the number of suicide data, Covid-19 confirmed case data from MHLW and unemployment rate data from MIC.
+
+* <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000140901.html">Suicide data</a>
+
+* <a href="https://www.mhlw.go.jp/stf/covid-19/open-data.html">Covid-19 data</a>
+
+* <a href="https://www.stat.go.jp/data/roudou/longtime/03roudou.html#hyo_1">Unemployment data</a>
+
+### 2.1 Descriptive Statistics
+The table below is summary of data. The data I use contains the number of suicide for each generations and gender, unemployment rate for men and women, and the number of confirmed case of covid-19 from 2013 to 2022. All of data is log-transformed.   
+$$\text{Descriptive Statistics} $$
+```{r, echo = FALSE, results="asis"}
+display_statistics_table <- function(){
+  descriptive_statistics_path = here::here("04_analyze","suicide_study","table","descriptive_table.html")
+
+  # HTMLファイルを文字列として読み込む
+  html_content <- readLines(descriptive_statistics_path)
+
+  # <!DOCTYPE html>を削除する
+  html_content <- gsub("<!DOCTYPE html>", "", html_content, ignore.case = TRUE)
+
+  # HTMLファイルを一時ファイルに書き出す
+  temp_file <- tempfile(fileext = ".html")
+  writeLines(html_content, temp_file)
+
+  # 一時ファイルを読み込む
+  htmltools::includeHTML(temp_file)
+}
+
+display_statistics_table()
+
+```
+
+### 2.2 Visualization
+ We can find that the number of suicide increases as age gets higher and it gets peak around 50s for both men and women.
+ These graphs below are visualizations for all data and vertical lines represent the month where celebrity's suicide was reported. It's difficult to draw conclusion that the suicide news affected the increase in suicide from these graphs. 
+
+
+```{r, echo = FALSE, results="asis"}
+file_name_graph <- c(
+  "suicide_male_1",
+  "suicide_male_2",
+  "suicide_male_3",
+  "suicide_female_1",
+  "suicide_female_2",
+  "suicide_female_3",
+  "unemployment_rate",
+  "confirmed_case"
+)
+
+display_graph <- function(file_name){
+  for (file_name in file_name){
+    file_path = here::here("04_analyze","unit_root_test","figure",
+                           paste0(file_name, "_study.png"))
+    graph <- htmltools::img(src = knitr::include_graphics(file_path), width = "70%")
+
+    print(graph)
+  }
+}
+
+display_graph(file_name_graph)
+
+```
+
+
+### 2.3 Unit root test
+We have to check whether each time series data has unit root. If a time series data has unit root, the data is called non-stationary. Estimating on non-stationary data leads to spurious relationship, so we need to distinguish stationary and non-stationary data. ADF, PP and KPSS are popular unit root test. As you can see in graph, some time series data potentially have structural break, which make it difficult to detect unit root correctly. So I tested unit root with Zivot-Andrew test that can take an effect of single structural  break into account.
+Most of the ADF test,PP test and KPSS test results contradict each other especially in men's suicide data. Here, I prioritize ADF test result and I confirmed data of woman under 19 yaers old as I(1).
+
+```{r, echo = FALSE, results="asis"}
+display_test_result <- function(){
+  unit_root_path = here::here("04_analyze","unit_root_test","table","unit_root_study.html")
+
+  # HTMLファイルを文字列として読み込む
+  html_content <- readLines(unit_root_path)
+
+  # <!DOCTYPE html>を削除する
+  html_content <- gsub("<!DOCTYPE html>", "", html_content, ignore.case = TRUE)
+
+  # HTMLファイルを一時ファイルに書き出す
+  temp_file <- tempfile(fileext = ".html")
+  writeLines(html_content, temp_file)
+
+  # 一時ファイルを読み込む
+  htmltools::includeHTML(temp_file)
+}
+
+display_test_result()
+```
+
+## 3 Model
+As for study of suicide, you can choose different empirical models depending on your purpose. In this report, I adopted ARDL model because it can include both endogenous and exogenous variables with their lags and allow I(1) data to be included. The model is given by:
+$$
+ln(S_{i,j,t}) = \alpha + \sum_{p=1}^{P} \beta_p ln(S_{i,j,t-p}) + \sum_{q=0}^{Q} \gamma_q ln(U_{i,t-q})+ \sum_{r=0}^{R} \delta_r ln(C_{t-r}) + \lambda_1 news_t + \lambda_2 month_t + \lambda_3 trend +  \epsilon_t
+$$
+where 
+
+* i,j,t represent gender, age, period respectively
+
+* S is the number of suicide
+
+* U is Unemployment rate
+
+* C is infection count
+
+* news is dummy for suicide reports
+
+* As a monthly dummy, I incorporated March and April dummy because in Japan, suicide case increases in spring. Look <a href="https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E3%81%AB%E3%81%8A%E3%81%91%E3%82%8B%E8%87%AA%E6%AE%BA">this site</a>
+
+The error correction model is given by:
+$$
+\Delta ln(S_{i,j,t}) = \alpha + \sum_{p=1}^{P} \Delta \beta_p ln(S_{i,j,t-p}) + \sum_{q=0}^{Q} \gamma_q \Delta ln(U_{i,t-q})+ \sum_{r=0}^{R}  \delta_r \Delta ln(C_{t-r}) + \theta_0 ln(S_{i,j,t-1}) + \theta_1 ln(U_{i,t-1}) + \theta_2 ln(C_{t-1}) + \lambda_1 news_t + \lambda_2 month_t + \lambda_3 trend +  \epsilon_t
+$$
+
+## 4 Result
+### 4.1 Estimation result
+I pick up only results where I can find 5% significance in suicide report dummy, which are 20s,30s,50s of men and 20s,40s,50s and 60s of women' results. Although I could find correlation between suicide and suicide news, we must be careful to interpret the results. Looking at diagnostic test in 4.3, you can find model of "wom_20s" doesn`t pass normality test, model of "man_50s" doesn't pass serial correlation test, which means there's room for improvement in model specification. Moreover, coefficient of suicide_report1 in "man_50s", suicide_report3 in "wom_40s" are negative with significance and it's hard to explain these results.
+```{r, echo = FALSE, results="asis"}
+gender_age <- c("man20s","man30s","man50s","wom20s","wom40s","wom50s","wom60s")
+
+display_coefficient <- function(file_name){
+  
+for (file_name in file_name){
+  gender <- stringr::str_to_lower(substr(file_name, 1, 3)) 
+  age <- substr(file_name, 4, 6)
+  
+  coefficient_table_path = here::here("04_analyze","suicide_study", "table", paste0(gender, "_", age),"coefficient_table", paste0("coefficient_table_", gender, "_", age, ".html"))
+
+  # HTMLファイルを文字列として読み込む
+  html_content <- readLines(coefficient_table_path)
+
+  # <!DOCTYPE html>を削除する
+  html_content <- gsub("<!DOCTYPE html>", "", html_content, ignore.case = TRUE)
+
+  # HTMLファイルを一時ファイルに書き出す
+  temp_file <- tempfile(fileext = ".html")
+  writeLines(html_content, temp_file)
+
+  # 一時ファイルを読み込む
+  table_output <- htmltools::includeHTML(temp_file)
+  print(table_output)}  
+}
+
+display_coefficient(gender_age)
+```
+
+### 4.2 Simulation
+This is visualization of simulation that how much the suicide reports have an effect on suicide and how its effect lingers on. 
+```{r, echo = FALSE, results="asis"}
+display_simulation <- function(file_name){
+
+print_graph <- function(path){
+   file_parts <- strsplit(path, "/")[[1]]
+   part1 <- gsub("_", " ", file_parts[length(file_parts)-1])
+   part2 <- gsub("_", " ", strsplit(file_parts[length(file_parts)], "\\.")[[1]][1])
+   if (part1=="man 20s"){
+     if (part2=="suicdie report2"||part2=="suicide report4"){
+       title <- sprintf("Effect of %s on %s *", part2, part1)
+          graph_output <-  htmltools::tags$div(style = "text-align: center;", htmltools::tags$img(src = knitr::image_uri(path), width = "55%"))
+   cat(paste0("<div style='text-align: center;'><h4><b>", title, "</b></h4></div>"))
+   print(graph_output)
+     }else{
+       title <- sprintf("Effect of %s on %s", part2, part1)
+     }
+   }
+   if (part1=="man 30s"){
+     if (part2=="suicide report4"){
+       title <- sprintf("Effect of %s on %s *", part2, part1)
+          graph_output <-  htmltools::tags$div(style = "text-align: center;", htmltools::tags$img(src = knitr::image_uri(path), width = "55%"))
+   cat(paste0("<div style='text-align: center;'><h4><b>", title, "</b></h4></div>"))
+   print(graph_output)
+     }else{
+       title <- sprintf("Effect of %s on %s", part2, part1)
+     }
+   }
+   if (part1=="man 50s"){
+     if (part2=="suicide report1"||part2=="suicide report4"){
+       title <- sprintf("Effect of %s on %s *", part2, part1)
+          graph_output <-  htmltools::tags$div(style = "text-align: center;", htmltools::tags$img(src = knitr::image_uri(path), width = "55%"))
+   cat(paste0("<div style='text-align: center;'><h4><b>", title, "</b></h4></div>"))
+   print(graph_output)
+     }else{
+       title <- sprintf("Effect of %s on %s", part2, part1)
+     }
+   }
+   if (part1=="wom 20s"){
+     if (part2=="suicide report2"){
+       title <- sprintf("Effect of %s on %s *", part2, part1)
+          graph_output <-  htmltools::tags$div(style = "text-align: center;", htmltools::tags$img(src = knitr::image_uri(path), width = "55%"))
+   cat(paste0("<div style='text-align: center;'><h4><b>", title, "</b></h4></div>"))
+   print(graph_output)
+     }else{
+       title <- sprintf("Effect of %s on %s", part2, part1)
+     }
+   }
+   if (part1=="wom 40s"){
+     if (part2=="suicide report3"||part2=="suicide report4"){
+       title <- sprintf("Effect of %s on %s *", part2, part1)
+          graph_output <-  htmltools::tags$div(style = "text-align: center;", htmltools::tags$img(src = knitr::image_uri(path), width = "55%"))
+   cat(paste0("<div style='text-align: center;'><h4><b>", title, "</b></h4></div>"))
+   print(graph_output)
+     }else{
+       title <- sprintf("Effect of %s on %s", part2, part1)
+     }
+   }
+   if (part1=="wom 50s"){
+     if (part2=="suicide report4"){
+       title <- sprintf("Effect of %s on %s *", part2, part1)
+          graph_output <-  htmltools::tags$div(style = "text-align: center;", htmltools::tags$img(src = knitr::image_uri(path), width = "55%"))
+   cat(paste0("<div style='text-align: center;'><h4><b>", title, "</b></h4></div>"))
+   print(graph_output)
+     }else{
+       title <- sprintf("Effect of %s on %s", part2, part1)
+     }
+   }
+   if (part1=="wom 60s"){
+     if (part2=="suicide report2"||part2=="suicide report4") {
+       title <- sprintf("Effect of %s on %s *", part2, part1)
+          graph_output <-  htmltools::tags$div(style = "text-align: center;", htmltools::tags$img(src = knitr::image_uri(path), width = "55%"))
+   cat(paste0("<div style='text-align: center;'><h4><b>", title, "</b></h4></div>"))
+   print(graph_output)
+     }else{
+       title <- sprintf("Effect of %s on %s", part2, part1)
+     }
+   }
+}
+
+  for (file_name in file_name){
+    gender <- stringr::str_to_lower(substr(file_name, 1, 3))
+    age <- substr(file_name, 4, 6)
+ simulation_folder_path = here::here("04_analyze","suicide_study","figure",paste0(gender, "_", age))
+
+  figure_lists <- list.files(path = simulation_folder_path, pattern = "png", full.names = TRUE)
+
+ purrr::map(figure_lists,  print_graph)
+
+ }
+}
+
+display_simulation(gender_age)
+```
+
+
+### 4.3 Diagnostic Test
+In time series empirical model, we should validate results. 
+```{r, echo = FALSE, results="asis"}
+
+display_diagnostic_test <- function(file_name){
+
+for (file_name in file_name){
+  gender <- stringr::str_to_lower(substr(file_name, 1, 3))
+  age <- substr(file_name, 4, 6)
+
+table_path = here::here("04_analyze","suicide_study", "table", paste0(gender, "_", age),"diagnostic_test", paste0("diagnostic_test_", gender, "_", age, ".html"))
+
+html_content <- readLines(table_path)
+
+# <!DOCTYPE html>を削除する
+html_content <- gsub("<!DOCTYPE html>", "", html_content, ignore.case = TRUE)
+
+# HTMLファイルを一時ファイルに書き出す
+temp_file <- tempfile(fileext = ".html")
+writeLines(html_content, temp_file)
+
+# 一時ファイルを読み込む
+table_output <- htmltools::includeHTML(temp_file)
+print(table_output)}
+}
+
+display_diagnostic_test(gender_age)
+```
+
+## 5 Discussion
+Although I could observe correlations between the number of suicide and media coverage on suicide, as I mentioned in section 4.1, there's issue in interpreting the result. One of the possible reason is that I incorrectly chose variables. For example, Covid-19 made it difficult to have interaction with people, which in turn worsen mental health of people. Considering that, I should have added pedestrian flow data as an index of people's interaction. That said, I believe the number of infections in part correlate with people's flow. Other than this, I had better have data about disease, which is one of the biggest reason for suicide.
+ Other reason that makes result harder to interpret is identification issue. Since I adopted reduced form model, we are not able to take the coefficients of variables as net effect of data. Suppose the value of living against value of committing suicide is given by:
+ $$
+ L(S_t) + \epsilon_{i0t}
+ $$
+ and value of committing suicide is defined by:
+ $$
+ \alpha_i + \beta_i U_{it} + \gamma_iC_t + \xi_{t} + \lambda D_t +  \epsilon_{it}
+ $$
+ where $S_t$ is state variable at time t, $D_t$ is dummy variables, $i$ represent individual, $\xi_{t}$ is unobserved shock and $ \epsilon$ follows type I extreme distribution. Then people make decision of suicide if 
+ $$
+ \alpha_i + \beta_i U_{it} + \gamma_iC_t + \xi_{t} +\lambda D_t + \epsilon_{it} > L(S_t) + \epsilon_{i0t}
+ $$
+ and we can formulate probability of suicide as: 
+ $$
+ P(suicide) = \frac{exp(\alpha_i + \beta_i U_{it} + \gamma_iC_t + \xi_{t}+\lambda D_t)}{exp(L(S_t)) + exp(\alpha_i + \beta_i U_{it} + \gamma_iC_t + \xi_{t} + \lambda D_t))}
+ $$
+ If this is true model of suicide, coefficients of reduced form model don't show actual effect of unemployment rate or confirmed case. Future study should address identification issue as well as selection of appropriate variables. 
+ 
+### Appendix
+```{r, echo = FALSE, results="asis"}
+all_gender_age <- c("manU19","man20s","man30s","man40s","man50s","man60s","man70s","man80s","womU19","wom20s","wom30s","wom40s","wom50s","wom60s","wom70s","wom80s")
+display_coefficient(all_gender_age)
+
+```
+
+
+```{r, echo = FALSE, results="asis"}
+display_diagnostic_test <- function(file_names){
+  # Create a div with flex display
+  div_style <- "display: flex; flex-wrap: wrap; justify-content: space-between;"
+  div_content <- lapply(file_names, function(file_name) {
+    gender <- stringr::str_to_lower(substr(file_name, 1, 3))
+    age <- substr(file_name, 4, 6)
+
+    table_path = here::here("04_analyze","suicide_study", "table", paste0(gender, "_", age),"diagnostic_test", paste0("diagnostic_test_", gender, "_", age, ".html"))
+
+    # HTMLファイルを文字列として読み込む
+    html_content <- readLines(table_path)
+
+    # <!DOCTYPE html>を削除する
+    html_content <- gsub("<!DOCTYPE html>", "", html_content, ignore.case = TRUE)
+
+    # HTMLファイルを一時ファイルに書き出す
+    temp_file <- tempfile(fileext = ".html")
+    writeLines(html_content, temp_file)
+
+    # 一時ファイルを読み込む
+    table_output <- htmltools::includeHTML(temp_file)
+    htmltools::tags$div(style = "flex-basis: 30%;", table_output)  # Change this line
+  })
+  print(htmltools::tags$div(style = div_style, div_content))
+}
+
+display_diagnostic_test(all_gender_age)
+```
+

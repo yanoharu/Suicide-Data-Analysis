@@ -1,0 +1,57 @@
+\setlength{\LTpost}{0mm}
+\begin{longtable}{lrrrrr}
+\caption*{
+{\large Unit Root Test}
+} \\ 
+\toprule
+  & AR\_lag & p.value(ADF)\textsuperscript{\textit{1}} & p.value(PP)\textsuperscript{\textit{2}} & p.value(KPSS)\textsuperscript{\textit{3}} & Stats(ZA),<br>Critical Value<br>= -4.8     \textsuperscript{\textit{4}} \\ 
+\midrule\addlinespace[2.5pt]
+U19(male) & 0 & 0.010 & 0.010 & 0.100 & -10.193 \\ 
+dU19(male) & 1 & 0.010 & 0.010 & 0.010 & -5.907 \\ 
+20s(male) & 2 & 0.010 & 0.010 & 0.010 & -6.037 \\ 
+d20s(male) & 0 & 0.010 & 0.010 & 0.010 & -10.323 \\ 
+30s(male) & 2 & 0.010 & 0.010 & 0.010 & -5.377 \\ 
+d30s(male) & 0 & 0.010 & 0.010 & 0.067 & -9.745 \\ 
+40s(male) & 1 & 0.010 & 0.010 & 0.010 & -5.248 \\ 
+d40s(male) & 2 & 0.010 & 0.010 & 0.100 & -5.672 \\ 
+50s(male) & 1 & 0.010 & 0.010 & 0.027 & -6.375 \\ 
+d50s(male) & 0 & 0.010 & 0.010 & 0.010 & -8.050 \\ 
+60s(male) & 2 & 0.080 & 0.010 & 0.010 & -4.760 \\ 
+d60s(male) & 2 & 0.037 & 0.010 & 0.010 & -4.542 \\ 
+70s(male) & 0 & 0.010 & 0.010 & 0.010 & -9.646 \\ 
+d70s(male) & 0 & 0.010 & 0.010 & 0.010 & -8.669 \\ 
+80s(male) & 2 & 0.010 & 0.010 & 0.010 & -5.784 \\ 
+d80s(male) & 3 & 0.010 & 0.010 & 0.045 & -6.953 \\ 
+U19(female) & 0 & 0.383 & 0.695 & 0.010 & -3.890 \\ 
+dU19(female) & 0 & 0.091 & 0.346 & 0.010 & -5.181 \\ 
+20s(female) & 0 & 0.010 & 0.010 & 0.100 & -18.324 \\ 
+d20s(female) & 1 & 0.010 & 0.010 & 0.100 & -10.406 \\ 
+30s(female) & 2 & 0.010 & 0.010 & 0.100 & -8.881 \\ 
+d30s(female) & 0 & 0.010 & 0.010 & 0.100 & -20.099 \\ 
+40s(female) & 2 & 0.010 & 0.010 & 0.100 & -8.601 \\ 
+d40s(female) & 0 & 0.010 & 0.010 & 0.100 & -20.653 \\ 
+50s(female) & 3 & 0.010 & 0.010 & 0.100 & -8.357 \\ 
+d50s(female) & 1 & 0.010 & 0.010 & 0.100 & -9.997 \\ 
+60s(female) & 1 & 0.010 & 0.010 & 0.100 & -11.049 \\ 
+d60s(female) & 0 & 0.010 & 0.010 & 0.100 & -17.310 \\ 
+70s(female) & 2 & 0.010 & 0.010 & 0.100 & -7.990 \\ 
+d70s(female) & 0 & 0.010 & 0.010 & 0.100 & -20.014 \\ 
+80s(female) & 0 & 0.010 & 0.010 & 0.100 & -18.552 \\ 
+d80s(female) & 0 & 0.010 & 0.010 & 0.100 & -18.221 \\ 
+Unemployment Rate(male) & 2 & 0.010 & 0.010 & 0.100 & -9.059 \\ 
+dUnemployment Rate(male) & 0 & 0.010 & 0.010 & 0.100 & -16.031 \\ 
+Unemployment Rate(female) & 0 & 0.010 & 0.010 & 0.100 & -14.976 \\ 
+dUnemployment Rate(female) & 0 & 0.010 & 0.010 & 0.100 & -15.210 \\ 
+confirmed cases & 3 & 0.010 & 0.010 & 0.100 & -6.908 \\ 
+dconfirmed\_cases & 3 & 0.954 & 0.864 & 0.010 & -3.916 \\ 
+\bottomrule
+\end{longtable}
+\begin{minipage}{\linewidth}
+\textsuperscript{\textit{1}}Lag order was chosen by AIC.
+Constant and trend are included.\\
+\textsuperscript{\textit{2}}Constant and trend are included\\
+\textsuperscript{\textit{3}}Null hypothesis is `time series is stationary`.
+Constant and trend are included\\
+\textsuperscript{\textit{4}}Alternative hypothesis is `time series doesn`t have unit root with single structual break`\\
+\end{minipage}
+
