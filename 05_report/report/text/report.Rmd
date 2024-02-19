@@ -42,7 +42,7 @@ display_statistics_table <- function(){
   writeLines(html_content, temp_file)
 
   # 一時ファイルを読み込む
-  htmltools::includeHTML(temp_file)
+  htmltools::tags$iframe(src = temp_file, width = "100%", height = "600px")
 }
 
 display_statistics_table()
@@ -100,7 +100,7 @@ display_test_result <- function(){
   writeLines(html_content, temp_file)
 
   # 一時ファイルを読み込む
-  htmltools::includeHTML(temp_file)
+  htmltools::tags$iframe(src = temp_file, width = "100%", height = "600px")
 }
 
 display_test_result()
@@ -132,10 +132,8 @@ $$
 
 ## 4 Result
 ### 4.1 Estimation result
-I pick up only results where I can find 5% significance in suicide report dummy, which are 20s,30s,50s of men and 20s,40s,50s and 60s of women' results. Although I could find correlation between suicide and suicide news, we must be careful to interpret the results. Looking at diagnostic test in 4.3, you can find model of "wom_20s" doesn`t pass normality test, model of "man_50s" doesn't pass serial correlation test, which means there's room for improvement in model specification. Moreover, coefficient of suicide_report1 in "man_50s", suicide_report3 in "wom_40s" are negative with significance and it's hard to explain these results.
+I pick up only results where I can find 5% significance in suicide report dummy, which are 20s,30s,50s of men and 20s,40s,50s and 60s of women' results. Although I could find correlation between suicide and suicide news, we must be careful to interpret the results. Looking at diagnostic test in Appendix, you can find model of "wom_20s" doesn`t pass normality test, model of "man_50s" doesn't pass serial correlation test, which means there's room for improvement in model specification. Moreover, coefficient of suicide_report1 in "man_50s", suicide_report3 in "wom_40s" are negative with significance and it's hard to explain these results.
 ```{r, echo = FALSE, results="asis"}
-gender_age <- c("man20s","man30s","man50s","wom20s","wom40s","wom50s","wom60s")
-
 display_coefficient <- function(file_name){
   
 for (file_name in file_name){
@@ -155,9 +153,11 @@ for (file_name in file_name){
   writeLines(html_content, temp_file)
 
   # 一時ファイルを読み込む
-  table_output <- htmltools::includeHTML(temp_file)
+  table_output <- htmltools::tags$iframe(src = temp_file, width = "100%", height = "600px")
   print(table_output)}  
 }
+
+gender_age <- c("man20s","man30s","man50s","wom20s","wom40s","wom50s","wom60s")
 
 display_coefficient(gender_age)
 ```
@@ -259,34 +259,6 @@ display_simulation(gender_age)
 ```
 
 
-### 4.3 Diagnostic Test
-In time series empirical model, we should validate results. 
-```{r, echo = FALSE, results="asis"}
-
-display_diagnostic_test <- function(file_name){
-
-for (file_name in file_name){
-  gender <- stringr::str_to_lower(substr(file_name, 1, 3))
-  age <- substr(file_name, 4, 6)
-
-table_path = here::here("04_analyze","suicide_study", "table", paste0(gender, "_", age),"diagnostic_test", paste0("diagnostic_test_", gender, "_", age, ".html"))
-
-html_content <- readLines(table_path)
-
-# <!DOCTYPE html>を削除する
-html_content <- gsub("<!DOCTYPE html>", "", html_content, ignore.case = TRUE)
-
-# HTMLファイルを一時ファイルに書き出す
-temp_file <- tempfile(fileext = ".html")
-writeLines(html_content, temp_file)
-
-# 一時ファイルを読み込む
-table_output <- htmltools::includeHTML(temp_file)
-print(table_output)}
-}
-
-display_diagnostic_test(gender_age)
-```
 
 ## 5 Discussion
 Although I could observe correlations between the number of suicide and media coverage on suicide, as I mentioned in section 4.1, there's issue in interpreting the result. One of the possible reason is that I incorrectly chose variables. For example, Covid-19 made it difficult to have interaction with people, which in turn worsen mental health of people. Considering that, I should have added pedestrian flow data as an index of people's interaction. That said, I believe the number of infections in part correlate with people's flow. Other than this, I had better have data about disease, which is one of the biggest reason for suicide.
@@ -317,32 +289,29 @@ display_coefficient(all_gender_age)
 
 
 ```{r, echo = FALSE, results="asis"}
-display_diagnostic_test <- function(file_names){
-  # Create a div with flex display
-  div_style <- "display: flex; flex-wrap: wrap; justify-content: space-between;"
-  div_content <- lapply(file_names, function(file_name) {
-    gender <- stringr::str_to_lower(substr(file_name, 1, 3))
-    age <- substr(file_name, 4, 6)
+display_diagnostic_test <- function(file_name){
 
-    table_path = here::here("04_analyze","suicide_study", "table", paste0(gender, "_", age),"diagnostic_test", paste0("diagnostic_test_", gender, "_", age, ".html"))
+for (file_name in file_name){
+  gender <- stringr::str_to_lower(substr(file_name, 1, 3))
+  age <- substr(file_name, 4, 6)
 
-    # HTMLファイルを文字列として読み込む
-    html_content <- readLines(table_path)
+table_path = here::here("04_analyze","suicide_study", "table", paste0(gender, "_", age),"diagnostic_test", paste0("diagnostic_test_", gender, "_", age, ".html"))
 
-    # <!DOCTYPE html>を削除する
-    html_content <- gsub("<!DOCTYPE html>", "", html_content, ignore.case = TRUE)
+html_content <- readLines(table_path)
 
-    # HTMLファイルを一時ファイルに書き出す
-    temp_file <- tempfile(fileext = ".html")
-    writeLines(html_content, temp_file)
+# <!DOCTYPE html>を削除する
+html_content <- gsub("<!DOCTYPE html>", "", html_content, ignore.case = TRUE)
 
-    # 一時ファイルを読み込む
-    table_output <- htmltools::includeHTML(temp_file)
-    htmltools::tags$div(style = "flex-basis: 30%;", table_output)  # Change this line
-  })
-  print(htmltools::tags$div(style = div_style, div_content))
+# HTMLファイルを一時ファイルに書き出す
+temp_file <- tempfile(fileext = ".html")
+writeLines(html_content, temp_file)
+
+# 一時ファイルを読み込む
+table_output <- htmltools::tags$iframe(src = temp_file, width = "100%", height = "600px")
+print(table_output)}
 }
 
 display_diagnostic_test(all_gender_age)
+
 ```
 
