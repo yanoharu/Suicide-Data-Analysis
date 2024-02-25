@@ -4,7 +4,6 @@ title: "An Analysis of the Relationship between Suicide Incidences and Suicide-r
 author: "Haruto Yano"
 date: "2023-05-12"
 output:
-  pdf_document: default
   html_document: default
 ---
 
