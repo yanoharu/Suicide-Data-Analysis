@@ -262,8 +262,14 @@ display_simulation(gender_age)
 
 
 ## 5 Discussion
-Although I could observe correlations between the number of suicide and media coverage on suicide, as I mentioned in section 4.1, there's issue in interpreting the result. One of the possible reason is that I incorrectly chose variables. For example, Covid-19 made it difficult to have interaction with people, which in turn worsen mental health of people. Considering that, I should have added pedestrian flow data as an index of people's interaction. That said, I believe the number of infections in part correlate with people's flow. Other than this, I had better have data about disease, which is one of the biggest reason for suicide.
- Other reason that makes result harder to interpret is identification issue. Since I adopted reduced form model, we are not able to take the coefficients of variables as net effect of data. Suppose the value of living against value of committing suicide is given by:
+Although I could observe correlations between the number of suicide and media coverage on suicide, as I mentioned in section 4.1, there's issue in interpreting the result. 
+
+### 5.1 Choice of variables
+
+One of the possible reason is that I incorrectly chose variables. For example, Covid-19 made it difficult to have interaction with people, which in turn worsen mental health of people. Considering that, I should have added pedestrian flow data as an index of people's interaction. That said, I believe the number of infections in part correlate with people's flow. Other than this, I had better have data about disease, which is one of the biggest reason for suicide or data about firm's bankruptcy.
+
+### 5.2 Model specification
+ Other reason that makes result uninterpretable is model specification and identification issue. Since I adopted reduced form model, we are not able to take the coefficients of variables as net effect of the variables. Suppose the value of living against value of committing suicide is given by:
  $$
  L(S_t) + \epsilon_{i0t}
  $$
@@ -279,5 +285,5 @@ Although I could observe correlations between the number of suicide and media co
  $$
  P(suicide) = \frac{exp(\alpha_i + \beta_i U_{it} + \gamma_iC_t + \xi_{t}+\lambda D_t)}{exp(L(S_t)) + exp(\alpha_i + \beta_i U_{it} + \gamma_iC_t + \xi_{t} + \lambda D_t))}
  $$
- If this is true model of suicide, coefficients of reduced form model don't show actual effect of unemployment rate or confirmed case. Future study should address identification issue as well as selection of appropriate variables. 
+ If this is true model of suicide, coefficients of reduced form model don't show actual effect of unemployment rate or confirmed case because reduced form model doesn't consider identification issue like structural model. Future study should address this identification issue as well as selection of appropriate variables. 
  
